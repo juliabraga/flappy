@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Oswald';
-    src: url('/fonts/Oswald-Regular.ttf') format('truetype');
+    src: url('../fonts/Oswald-Regular.ttf') format('truetype');
 }
 
 * {
@@ -18,7 +18,7 @@ body {
     height: 100%;
 }
 
-.conteudo {
+.content {
     display: flex;
     flex-direction: column;
     align-items: center;

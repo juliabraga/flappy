@@ -1,167 +1,159 @@
-function novoElemento(tagName, className) {
-    const elem = document.createElement(tagName)
-    elem.className = className
-    return elem
+function newElement(tagName, className) {
+    const newElement = document.createElement(tagName)
+    newElement.className = className
+    return newElement
 }
 
-function barreira(reversa = false) {
-    this.elemento = novoElemento('div', 'barreira')
+function pipe(reversa = false) {
+    this.element = newElement('div', 'pipe')
 
-    const borda = novoElemento('div', 'borda')
-    const corpo = novoElemento('div', 'corpo')
+    const border = newElement('div', 'border')
+    const body = newElement('div', 'body')
 
-    this.elemento.appendChild(reversa ? corpo : borda)
-    this.elemento.appendChild(reversa ? borda : corpo)
+    this.element.appendChild(reversa ? body : border)
+    this.element.appendChild(reversa ? border : body)
 
-    this.setAltura = altura => corpo.style.height = `${altura}px`
+    this.setHeight = height => body.style.height = `${height}px`
 }
 
-// const b = new barreira (true)
-// b.setAltura(200)
-// document.querySelector('[wm-flappy]').appendChild(b.elemento)
 
-function parDeBarreiras(altura, abertura, x) {
-    this.elemento = novoElemento('div', 'par-de-barreiras')
+function pairOfPipes(height, open, x) {
+    this.element = newElement('div', 'pair-of-pipes')
 
-    this.superior = new barreira(true)
-    this.inferior = new barreira(false)
+    this.upper = new pipe(true)
+    this.bottom = new pipe(false)
 
-    this.elemento.appendChild(this.superior.elemento)
-    this.elemento.appendChild(this.inferior.elemento)
+    this.element.appendChild(this.upper.element)
+    this.element.appendChild(this.bottom.element)
 
-    this.sortearAltura = () => {
-        const alturaSuperior = Math.random() * (altura - abertura)
-        const alturaInferior = altura - abertura - alturaSuperior
-        this.superior.setAltura(alturaSuperior)
-        this.inferior.setAltura(alturaInferior)
+    this.randomHeight = () => {
+        const upperPipe = Math.random() * (height - open)
+        const bottomPipe = height - open - upperPipe
+        this.upper.setHeight(upperPipe)
+        this.bottom.setHeight(bottomPipe)
     }
 
-    this.getX = () => parseInt(this.elemento.style.left.split('px')[0])
-    this.setX = x => this.elemento.style.left = `${x}px`
-    this.getLargura = () => this.elemento.clientWidth
+    this.getX = () => parseInt(this.element.style.left.split('px')[0])
+    this.setX = x => this.element.style.left = `${x}px`
+    this.getWidth = () => this.element.clientWidth
 
-    this.sortearAltura()
+    this.randomHeight()
     this.setX(x)
 }
 
-// const b = new parDeBarreiras(500, 200, 400)
-// document.querySelector('[wm-flappy]').appendChild(b.elemento) 
-
-function Barreiras(altura, largura, abertura, espaco, pontuar) {
-    this.pares = [
-        new parDeBarreiras(altura, abertura, largura),
-        new parDeBarreiras(altura, abertura, largura + espaco),
-        new parDeBarreiras(altura, abertura, largura + espaco * 2),
-        new parDeBarreiras(altura, abertura, largura + espaco * 3)
+function setOfPipes(height, width, open, between, getPoint) {
+    this.pairs = [
+        new pairOfPipes(height, open, width),
+        new pairOfPipes(height, open, width + between),
+        new pairOfPipes(height, open, width + between * 2),
+        new pairOfPipes(height, open, width + between * 3)
     ]
 
-    const deslocamento = 3
+    const displacement = 3
 
-    this.animar = () => {
-        this.pares.forEach(par => {
-            par.setX(par.getX() - deslocamento)
+    this.animation = () => {
+        this.pairs.forEach(pair => {
+            pair.setX(pair.getX() - displacement)
 
-            if (par.getX() < -par.getLargura()) {
-                par.setX(par.getX() + espaco * this.pares.length)
-                par.sortearAltura()
+            if (pair.getX() < -pair.getWidth()) {
+                pair.setX(pair.getX() + between * this.pairs.length)
+                pair.randomHeight()
             }
 
-            const meio = largura / 2
-            const cruzou = par.getX() + deslocamento >= meio
-                && par.getX() < meio
+            const middle = width / 2
+            const crossMiddle = pair.getX() + displacement >= middle
+                && pair.getX() < middle
 
-            cruzou && pontuar()
+                crossMiddle && getPoint()
         })
     }
 }
 
+function Bird(gameHeight) {
+    let fly = false
 
+    this.element = newElement('img', 'bird')
+    this.element.src = 'imgs/bird.png'
 
-function Passaro(alturaJogo) {
-    let voando = false
+    this.getY = () => parseInt(this.element.style.bottom.split('px')[0])
+    this.setY = y => this.element.style.bottom = `${y}px`
 
-    this.elemento = novoElemento('img', 'passaro')
-    this.elemento.src = 'imgs/passaro.png'
+    window.onkeydown = e => fly = true
+    window.onkeyup = e => fly = false
 
-    this.getY = () => parseInt(this.elemento.style.bottom.split('px')[0])
-    this.setY = y => this.elemento.style.bottom = `${y}px`
-
-    window.onkeydown = e => voando = true
-    window.onkeyup = e => voando = false
-
-    this.animar = () => {
-        const newY = this.getY() + (voando ? 8 : -5)
-        const alturaMaxima = alturaJogo - this.elemento.clientHeight
+    this.animation = () => {
+        const newY = this.getY() + (fly ? 8 : -5)
+        const MaxHeight = gameHeight - this.element.clientHeight
 
         if (newY <= 0) {
             this.setY(0)
-        } else if (newY >= alturaMaxima) {
-            this.setY(alturaMaxima)
+        } else if (newY >= MaxHeight) {
+            this.setY(MaxHeight)
         } else {
             this.setY(newY)
         }
     }
 
-    this.setY(alturaJogo / 2)
+    this.setY(gameHeight / 2)
 }
 
-function Progresso() {
-    this.elemento = novoElemento('span', 'progresso')
-    this.atualizaPontos = pontos => {
-        this.elemento.innerHTML = pontos
+function Progress() {
+    this.element = newElement('span', 'progress')
+    this.updatePoints = points => {
+        this.element.innerHTML = points
     }
-    this.atualizaPontos(0)
+    this.updatePoints(0)
 }
 
-function passou(elementoA, elementoB) {
-    const a = elementoA.getBoundingClientRect()
-    const b = elementoB.getBoundingClientRect()
+function crash(elementA, elementB) {
+    const a = elementA.getBoundingClientRect()
+    const b = elementB.getBoundingClientRect()
 
-    const naHorizontal = a.left + a.width >= b.left
+    const axisX = a.left + a.width >= b.left
         && b.left + b.width >= a.left
-    const naVertical = a.top + a.height >= b.top
+    const axisY = a.top + a.height >= b.top
         && b.top + b.height >= a.top
 
-    return naVertical && naHorizontal
+    return axisX && axisY
 }
 
-function bateu(passaro, barreiras) {
-    let bateu = false
+function colapsed(bird, setOfPipes) {
+    let colapsed = false
 
-    barreiras.pares.forEach(parDeBarreiras => {
-        if (!bateu) {
-            const superior = parDeBarreiras.superior.elemento
-            const inferior = parDeBarreiras.inferior.elemento
+    setOfPipes.pairs.forEach(pairOfPipes => {
+        if (!colapsed) {
+            const upper = pairOfPipes.upper.element
+            const bottom = pairOfPipes.bottom.element
 
-            bateu = passou(passaro.elemento, superior)
-                || passou(passaro.elemento, inferior)
+            colapsed = crash(bird.element, upper)
+                || crash(bird.element, bottom)
         }
     })
-    return bateu
+    return colapsed
 }
 
 function FlappyBird() {
-    let pontos = 0
+    let points = 0
 
-    const areaDoJogo = document.querySelector('[flappyArea]')
-    const altura = areaDoJogo.clientHeight
-    const largura = areaDoJogo.clientWidth
+    const GameArea = document.querySelector('[flappyArea]')
+    const height = GameArea.clientHeight
+    const width = GameArea.clientWidth
 
-    const progresso = new Progresso()
-    const passaro = new Passaro(altura)
-    const barreiras = new Barreiras(altura, largura, 200, 400, () => progresso.atualizaPontos(++pontos))
+    const progress= new Progress()
+    const bird = new Bird(height)
+    const pipes = new setOfPipes(height, width, 200, 400, () => progress.updatePoints(++points))
 
-    areaDoJogo.appendChild(progresso.elemento)
-    areaDoJogo.appendChild(passaro.elemento)
-    barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento))
+    GameArea.appendChild(progress.element)
+    GameArea.appendChild(bird.element)
+    pipes.pairs.forEach(pair => GameArea.appendChild(pair.element))
 
     this.start = () => {
-        const temporizador = setInterval(() => {
-            barreiras.animar()
-            passaro.animar()
+        const time = setInterval(() => {
+            pipes.animation()
+            bird.animation()
 
-            if(bateu(passaro, barreiras)) {
-                clearInterval(temporizador)
+            if(colapsed(bird, pipes)) {
+                clearInterval(time)
             }
         }, 20)
     }
